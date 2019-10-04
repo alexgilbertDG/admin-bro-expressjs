@@ -102,6 +102,7 @@ const buildRouter = (admin, predefinedRouter) => {
  * @param  {String} auth.cookieName=adminbro      cookie name
  * @param  {express.Router} [predefinedRouter]    Express.js router
  * @return {express.Router}                       Express.js router
+* @param  {Object} sessionOptions                 Express.js session options
  * @static
  * @memberof module:admin-bro-expressjs
  * @example
@@ -119,19 +120,20 @@ const buildRouter = (admin, predefinedRouter) => {
  *   },
  *   cookieName: 'adminbro',
  *   cookiePassword: 'somepassword',
- * }, [router])
+ * }, [router], {resave: false})
 */
-const buildAuthenticatedRouter = (admin, auth, predefinedRouter) => {
+const buildAuthenticatedRouter = (admin, auth, predefinedRouter, sessionOptions) => {
   if (!cookieParser || !session) {
     throw new Error(['In order to use authentication, you have to install',
       'cookie-parser and express-session packages'].join(' '))
   }
   const router = predefinedRouter || express.Router()
   router.use(cookieParser())
-  router.use(session({
-    secret: auth.cookiePassword,
-    name: auth.cookieName || 'adminbro',
-  }))
+  const sessionData = {
+     secret: auth.cookiePassword,
+     name: auth.cookieName || 'adminbro',
+  }
+  router.use(session(Object.assign(sessionData, sessionOptions || {})))
   router.use(bodyParser.json())
   router.use(bodyParser.urlencoded({ extended: true }))
 
